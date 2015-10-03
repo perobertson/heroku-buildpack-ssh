@@ -30,10 +30,7 @@ if [[ -f "${ENV_DIR}/SSH_KNOWN_HOSTS" ]]; then
   if [[ ! -f "${BUILD_DIR}/.profile.d/init_known_hosts.sh" ]]; then
     msg "Setting up known hosts"
     echo '#!/usr/bin/env bash' > "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
-    for host in $(cat "${ENV_DIR}/SSH_KNOWN_HOSTS")
-    do
-      echo "ssh-keyscan $host >> \"\${HOME}/.ssh/known_hosts\"" >> "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
-    done
+    echo '[[ "${SSH_KNOWN_HOSTS}" != "" ]] && ssh-keyscan $SSH_KNOWN_HOSTS >> "${HOME}/.ssh/known_hosts"' >> "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
     chmod ugo+x "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
   else
     msg "Skipping known hosts: .profile.d/init_known_hosts.sh already exists"

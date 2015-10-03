@@ -5,7 +5,7 @@ Sets a ssh private key from an environment variable. It can also set the known h
 Set `SSH_KEY` variable to private key:
 
 ```bash
-heroku config:set SSH_KEY="$(cat /path/to/id_rsa)"
+heroku config:set SSH_KEY="$(cat /path/to/id_rsa)" > /dev/null
 heroku config:set SSH_KEY_PUB="$(cat /path/to/id_rsa.pub)"
 ```
 
@@ -13,4 +13,9 @@ heroku config:set SSH_KEY_PUB="$(cat /path/to/id_rsa.pub)"
 
 ```bash
 heroku config:set SSH_KNOWN_HOSTS="github.com bitbucket.com"
+```
+
+Add the buildpack to your app:
+```bash
+heroku buildpacks:add https://github.com/perobertson/heroku-buildpack-ssh
 ```

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+if [[ "${SSH_KEY}" != '' ]]; then
+  echo 'SSH key detected'
+  exit 0
+elif [[ "${SSH_KEY_PUB}" != '' ]]; then
+  echo 'SSH public key detected'
+  exit 0
+elif [[ "${SSH_KNOWN_HOSTS}" != '' ]]; then
+  echo 'SSH known hosts detected'
+  exit 0
+fi
+exit 1

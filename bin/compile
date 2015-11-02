@@ -9,30 +9,37 @@ msg() { echo "       $1"; }
 
 say "Setting up ssh keys"
 
+[[ ! -d "${BUILD_DIR}/.profile.d" ]] && mkdir "${BUILD_DIR}/.profile.d"
+if [[ ! -f "${BUILD_DIR}/.profile.d/init_ssh.sh" ]]; then
+  msg "Creating: ${BUILD_DIR}/.profile.d/init_ssh.sh"
+  echo '#!/usr/bin/env bash' > "${BUILD_DIR}/.profile.d/init_ssh.sh"
+  chmod ugo+x "${BUILD_DIR}/.profile.d/init_ssh.sh"
+else
+  msg "Error: File already exists ${BUILD_DIR}/.profile.d/init_ssh.sh"
+  exit 1
+fi
+
 if [[ ! -d "${BUILD_DIR}/.ssh" ]]; then
   mkdir "${BUILD_DIR}/.ssh"
   chmod 700 "${BUILD_DIR}/.ssh"
 fi
 
 if [[ -f "${ENV_DIR}/SSH_KEY" ]]; then
+  msg "Adding private key"
   cp "${ENV_DIR}/SSH_KEY" "${BUILD_DIR}/.ssh/id_rsa"
   chmod 600 "${BUILD_DIR}/.ssh/id_rsa"
+  echo "unset -v SSH_KEY" >> "${BUILD_DIR}/.profile.d/init_ssh.sh"
 fi
 
 if [[ -f "${ENV_DIR}/SSH_KEY_PUB" ]]; then
+  msg "Adding public key"
   cp "${ENV_DIR}/SSH_KEY_PUB" "${BUILD_DIR}/.ssh/id_rsa.pub"
   chmod 600 "${BUILD_DIR}/.ssh/id_rsa.pub"
+  echo "unset -v SSH_KEY_PUB" >> "${BUILD_DIR}/.profile.d/init_ssh.sh"
 fi
 
 # put in profile.d because hosts can change keys overtime
 if [[ -f "${ENV_DIR}/SSH_KNOWN_HOSTS" ]]; then
-  [[ ! -d "${BUILD_DIR}/.profile.d" ]] && mkdir "${BUILD_DIR}/.profile.d"
-  if [[ ! -f "${BUILD_DIR}/.profile.d/init_known_hosts.sh" ]]; then
-    msg "Setting up known hosts"
-    echo '#!/usr/bin/env bash' > "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
-    echo '[[ "${SSH_KNOWN_HOSTS}" != "" ]] && ssh-keyscan $SSH_KNOWN_HOSTS >> "${HOME}/.ssh/known_hosts"' >> "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
-    chmod ugo+x "${BUILD_DIR}/.profile.d/init_known_hosts.sh"
-  else
-    msg "Skipping known hosts: .profile.d/init_known_hosts.sh already exists"
-  fi
+  msg "Setting up known hosts"
+  echo '[[ "${SSH_KNOWN_HOSTS}" != "" ]] && ssh-keyscan $SSH_KNOWN_HOSTS >> "${HOME}/.ssh/known_hosts" 2>/dev/null' >> "${BUILD_DIR}/.profile.d/init_ssh.sh"
 fi
